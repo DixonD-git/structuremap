@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Castle.Core.Internal;
+using Fixie;
+using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Castle.Core.Internal;
-using Fixie;
-using NUnit.Framework;
 
 namespace NUnit.Framework
 {
@@ -14,6 +14,17 @@ namespace NUnit.Framework
 
     public class TestAttribute : Attribute
     {
+    }
+
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
+    public class TestCaseAttribute : Attribute
+    {
+        public TestCaseAttribute(params object[] arguments)
+        {
+            Arguments = arguments;
+        }
+
+        public object[] Arguments { get; private set; }
     }
 
     public class ExplicitAttribute : Attribute
@@ -57,8 +68,6 @@ namespace NUnit.Framework
         {
             throw new Exception(message);
         }
-
-
     }
 }
 
@@ -85,7 +94,6 @@ namespace StructureMap.Testing
                 .Wrap<SetUpTearDown>();
         }
     }
-
 
     internal class SetUpTearDown : CaseBehavior
     {
