@@ -22,7 +22,7 @@ namespace StructureMap.Building.Interception
             _description = description;
         }
 
-        public string Description
+        public virtual string Description
         {
             get
             {
