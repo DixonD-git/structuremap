@@ -81,7 +81,8 @@ namespace StructureMap.Testing
                 .HasOrInherits<TestFixtureAttribute>();
 
             Methods
-                .HasOrInherits<TestAttribute>().Where(m => !m.HasAttribute<ExplicitAttribute>());
+                .Where(m => m.HasOrInherits<TestAttribute>() || m.HasOrInherits<TestCaseAttribute>())
+                .Where(m => !m.HasAttribute<ExplicitAttribute>());
 
             ClassExecution
                 .CreateInstancePerClass()
@@ -92,6 +93,17 @@ namespace StructureMap.Testing
 
             CaseExecution
                 .Wrap<SetUpTearDown>();
+
+            Parameters
+                .Add<FromTestCaseAttribute>();
+        }
+    }
+
+    internal class FromTestCaseAttribute : ParameterSource
+    {
+        public IEnumerable<object[]> GetParameters(MethodInfo method)
+        {
+            return method.GetCustomAttributes<TestCaseAttribute>(true).Select(input => input.Arguments);
         }
     }
 
