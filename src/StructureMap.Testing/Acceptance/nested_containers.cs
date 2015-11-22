@@ -51,7 +51,7 @@ namespace StructureMap.Testing.Acceptance
 
             var singleton = container.GetInstance<IColorCache>();
 
-            // Singleton's are resolved from the parent container
+            // SingletonThing's are resolved from the parent container
             using (var nested = container.GetNestedContainer())
             {
                 nested.GetInstance<IColorCache>()
@@ -121,20 +121,24 @@ namespace StructureMap.Testing.Acceptance
         {
             var container = new Container(_ =>
             {
-                // A singleton scoped service
+                // A SingletonThing scoped service
                 _.ForSingletonOf<IColorCache>().Use<ColorCache>();
 
                 // A transient scoped service
                 _.For<IColor>().Use<Green>();
+
+                // An AlwaysUnique scoped service
+                _.For<Purple>().AlwaysUnique();
             });
 
             ColorCache singleton = null;
             Green nestedGreen = null;
             Blue nestedBlue = null;
+            Purple nestedPurple = null;
 
             using (var nested = container.GetNestedContainer())
             {
-                // Singleton's are really built by the parent
+                // SingletonThing's are really built by the parent
                 singleton = nested.GetInstance<IColorCache>()
                     .ShouldBeOfType<ColorCache>();
 
@@ -143,13 +147,19 @@ namespace StructureMap.Testing.Acceptance
 
 
                 nestedBlue = nested.GetInstance<Blue>();
+
+                nestedPurple = nested.GetInstance<Purple>();
             }
 
             // Transients created by the Nested Container
-            // are disposed, but no other lifecycle is
-            // disposed
+            // are disposed
             nestedGreen.WasDisposed.ShouldBeTrue();
             nestedBlue.WasDisposed.ShouldBeTrue();
+
+            // Unique's created by the Nested Container
+            // are disposed
+            nestedPurple.WasDisposed.ShouldBeTrue();
+
 
             // NOT disposed because it's owned by
             // the parent container
@@ -239,6 +249,28 @@ namespace StructureMap.Testing.Acceptance
         }
 
         // ENDSAMPLE
+
+        [Test]
+        public void always_unique_disposal()
+        {
+            var container = new Container(_ =>
+            {
+                _.For<Blue>().AlwaysUnique();
+            });
+
+            Blue nestedBlue1;
+            Blue nestedBlue2;
+            using (var nested = container.GetNestedContainer())
+            {
+                nestedBlue1 = nested.GetInstance<Blue>();
+                nestedBlue2 = nested.GetInstance<Blue>();
+
+                nestedBlue1.ShouldNotBeTheSameAs(nestedBlue2);
+            }
+
+            nestedBlue1.WasDisposed.ShouldBeTrue();
+            nestedBlue2.WasDisposed.ShouldBeTrue();
+        }
     }
 
     // SAMPLE: nested-colors
@@ -249,6 +281,8 @@ namespace StructureMap.Testing.Acceptance
     public class Red : IColor
     {
     }
+
+    public class Purple : Blue  {  }
 
     public class Blue : IColor, IDisposable
     {

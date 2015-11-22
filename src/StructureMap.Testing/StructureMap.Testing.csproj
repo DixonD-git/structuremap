@@ -172,26 +172,37 @@
       <Link>CommonAssemblyInfo.cs</Link>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Acceptance\attribute_usage.cs" />
+    <Compile Include="Acceptance\basic_registrations.cs" />
     <Compile Include="Acceptance\builder_for_open_generic_type.cs" />
     <Compile Include="Acceptance\build_by_lambdas.cs" />
     <Compile Include="Acceptance\child_containers.cs" />
+    <Compile Include="Acceptance\clear_all.cs" />
     <Compile Include="Acceptance\constructor_selection.cs" />
+    <Compile Include="Acceptance\container_scoping.cs" />
     <Compile Include="Acceptance\contextual_building.cs" />
+    <Compile Include="Acceptance\custom_policies.cs" />
     <Compile Include="Acceptance\custom_registration_convention.cs" />
     <Compile Include="Acceptance\DynamicProxyInterceptorAcceptanceTests.cs" />
     <Compile Include="Acceptance\ejecting_instances.cs" />
     <Compile Include="Acceptance\enumerable_instances.cs" />
     <Compile Include="Acceptance\explicit_arguments.cs" />
+    <Compile Include="Acceptance\fallback_registrations.cs" />
+    <Compile Include="Acceptance\forwarding.cs" />
     <Compile Include="Acceptance\full_stack_container_usage.cs" />
+    <Compile Include="Acceptance\generic_types.cs" />
+    <Compile Include="Acceptance\iconfigured_instance_behavior.cs" />
     <Compile Include="Acceptance\inline_dependencies.cs" />
     <Compile Include="Acceptance\interception_acceptance_tests.cs" />
     <Compile Include="Acceptance\lifecycle_creation.cs" />
     <Compile Include="Acceptance\nested_containers.cs" />
     <Compile Include="Acceptance\nested_registry_declarations.cs" />
+    <Compile Include="Acceptance\scanning_samples.cs" />
     <Compile Include="Acceptance\setter_rules_are_reset_by_configure.cs" />
     <Compile Include="Acceptance\setting_lifecycle_scope.cs" />
     <Compile Include="Acceptance\transient_tracking_mode_specs.cs" />
     <Compile Include="Acceptance\try_get_instance.cs" />
+    <Compile Include="Acceptance\Visualization\VisualizationClasses.cs" />
     <Compile Include="AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -226,6 +237,8 @@
     <Compile Include="Bugs\Bug_338.cs" />
     <Compile Include="Bugs\Bug_354_bidirectional_dep_bug_under_heavy_threading.cs" />
     <Compile Include="Bugs\Bug_363_HasBeenCreated_for_ObjectLifecycle.cs" />
+    <Compile Include="Bugs\Bug_416_missing_name_instance_in_try_get_instance.cs" />
+    <Compile Include="Bugs\Bug_417_instance_names_filled_in_from_missing_instance_name.cs" />
     <Compile Include="Bugs\BuildUpBug.cs" />
     <Compile Include="Bugs\ChildContainer_Singleton_error_330.cs" />
     <Compile Include="Bugs\closed_type_generic_is_in_get_all.cs" />
@@ -308,16 +321,17 @@
     <Compile Include="Diagnostics\VisualizationRegistry.cs" />
     <Compile Include="Diagnostics\WriterExtensions.cs" />
     <Compile Include="disposed_container_message_tester.cs" />
-    <Compile Include="Examples.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="Examples.cs" />
     <Compile Include="Examples\BuildUp.cs" />
+    <Compile Include="Examples\ChildContainers.cs" />
     <Compile Include="Examples\DependencyInjection.cs" />
     <Compile Include="Examples\FamilyPolicies\custom_policy_for_configuration.cs" />
+    <Compile Include="Examples\LifecycleSamples.cs" />
     <Compile Include="Examples\MultiTenancy\missing_instance_rule_overrides.cs" />
     <Compile Include="Examples\Resolving\OptionalDependencies.cs" />
     <Compile Include="Examples\Resolving\SimpleScenarios.cs" />
     <Compile Include="Examples\UsingContainerModel.cs" />
+    <Compile Include="Examples\UsingIConfiguredInstance.cs" />
     <Compile Include="Examples\ValidationMethod.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="FixieConventions.cs" />
@@ -366,7 +380,6 @@
     </Compile>
     <Compile Include="InstanceExtensions.cs" />
     <Compile Include="ModelQueryTester.cs" />
-    <Compile Include="ObjectFactoryInitializeTester.cs" />
     <Compile Include="PipelineGraph_construction_specs.cs" />
     <Compile Include="Pipeline\ArgumentTester.cs" />
     <Compile Include="Pipeline\BuildStrategiesTester.cs" />
@@ -487,22 +500,23 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="AutoFactories\Supporting\" />
     <Folder Include="Samples\NestedContainers\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PreBuildEvent>
-    </PreBuildEvent>
-    <PostBuildEvent>
-    </PostBuildEvent>
-  </PropertyGroup>
-  <Import Project="..\..\.paket\paket.targets" />
   <Choose>
     <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v3.5'">
       <ItemGroup>
         <Reference Include="Castle.Core">
           <HintPath>..\..\packages\Castle.Core\lib\net35\Castle.Core.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.0' Or $(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6')">
+      <ItemGroup>
+        <Reference Include="Castle.Core">
+          <HintPath>..\..\packages\Castle.Core\lib\net40-client\Castle.Core.dll</HintPath>
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>
@@ -517,21 +531,21 @@
         </Reference>
       </ItemGroup>
     </When>
-    <When Condition="($(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.0' Or $(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6')) Or ($(TargetFrameworkIdentifier) == 'MonoAndroid') Or ($(TargetFrameworkIdentifier) == 'MonoTouch')">
-      <ItemGroup>
-        <Reference Include="Castle.Core">
-          <HintPath>..\..\packages\Castle.Core\lib\net40-client\Castle.Core.dll</HintPath>
-          <Private>True</Private>
-          <Paket>True</Paket>
-        </Reference>
-      </ItemGroup>
-    </When>
   </Choose>
   <Choose>
     <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And $(TargetFrameworkVersion) == 'v3.5'">
       <ItemGroup>
         <Reference Include="Moq">
           <HintPath>..\..\packages\Moq\lib\NET35\Moq.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.0' Or $(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6')">
+      <ItemGroup>
+        <Reference Include="Moq">
+          <HintPath>..\..\packages\Moq\lib\NET40\Moq.dll</HintPath>
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>
@@ -551,18 +565,9 @@
         </Reference>
       </ItemGroup>
     </When>
-    <When Condition="($(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.0' Or $(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6')) Or ($(TargetFrameworkIdentifier) == 'MonoAndroid') Or ($(TargetFrameworkIdentifier) == 'MonoTouch')">
-      <ItemGroup>
-        <Reference Include="Moq">
-          <HintPath>..\..\packages\Moq\lib\NET40\Moq.dll</HintPath>
-          <Private>True</Private>
-          <Paket>True</Paket>
-        </Reference>
-      </ItemGroup>
-    </When>
   </Choose>
   <Choose>
-    <When Condition="($(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v2.0' Or $(TargetFrameworkVersion) == 'v3.0' Or $(TargetFrameworkVersion) == 'v3.5' Or $(TargetFrameworkVersion) == 'v4.0' Or $(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6')) Or ($(TargetFrameworkIdentifier) == 'MonoAndroid') Or ($(TargetFrameworkIdentifier) == 'MonoTouch')">
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v2.0' Or $(TargetFrameworkVersion) == 'v3.0' Or $(TargetFrameworkVersion) == 'v3.5' Or $(TargetFrameworkVersion) == 'v4.0' Or $(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6')">
       <ItemGroup>
         <Reference Include="Rhino.Mocks">
           <HintPath>..\..\packages\RhinoMocks\lib\net\Rhino.Mocks.dll</HintPath>
@@ -582,7 +587,7 @@
         </Reference>
       </ItemGroup>
     </When>
-    <When Condition="($(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.0' Or $(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6')) Or ($(TargetFrameworkIdentifier) == 'MonoAndroid') Or ($(TargetFrameworkIdentifier) == 'MonoTouch')">
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.0' Or $(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6')">
       <ItemGroup>
         <Reference Include="Shouldly">
           <HintPath>..\..\packages\Shouldly\lib\net40\Shouldly.dll</HintPath>
@@ -592,4 +597,10 @@
       </ItemGroup>
     </When>
   </Choose>
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
 </Project>

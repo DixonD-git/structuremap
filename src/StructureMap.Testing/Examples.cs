@@ -5,7 +5,10 @@ using System.Windows.Forms;
 using StructureMap.Attributes;
 using StructureMap.Configuration.DSL;
 using StructureMap.Graph;
+using StructureMap.Graph.Scanning;
+using StructureMap.Testing.Acceptance;
 using StructureMap.Testing.Widget3;
+using IService = StructureMap.Testing.Widget3.IService;
 
 namespace StructureMap.Testing.DocumentationExamples
 {
@@ -227,6 +230,39 @@ namespace StructureMap.Testing.DocumentationExamples
         }
     }
 
+    // SAMPLE: BasicScanning
+    public class BasicScanning : Registry
+    {
+        public BasicScanning()
+        {
+            Scan(_ =>
+            {
+                // Declare which assemblies to scan
+                _.Assembly("StructureMap.Testing");
+                _.AssemblyContainingType<IWidget>();
+
+                // Filter types
+                _.Exclude(type => type.Name.Contains("Bad"));
+
+                // A custom registration convention
+                _.Convention<MySpecialRegistrationConvention>();
+
+                // Built in registration conventions
+                _.AddAllTypesOf<IWidget>().NameBy(x => x.Name.Replace("Widget", ""));
+                _.WithDefaultConventions();
+            });
+        }
+    }
+    // ENDSAMPLE
+
+    public class MySpecialRegistrationConvention : IRegistrationConvention
+    {
+        public void ScanTypes(TypeSet types, Registry registry)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     public class Invoice
     {
     }
@@ -235,17 +271,22 @@ namespace StructureMap.Testing.DocumentationExamples
     {
     }
 
+    public class SimpleRepository : IRepository { }
+
     public interface IPresenter
     {
         void Activate();
     }
+
+ 
+
 
     public class ShippingScreenPresenter : IPresenter
     {
         private readonly IRepository _repository;
         private readonly IShippingService _service;
 
-
+        // SAMPLE: ShippingScreenPresenter-with-ctor-injection
         // This is the way to write a Constructor Function with an IoC tool
         // Let the IoC container "inject" services from outside, and keep
         // ShippingScreenPresenter ignorant of the IoC infrastructure
@@ -254,8 +295,9 @@ namespace StructureMap.Testing.DocumentationExamples
             _service = service;
             _repository = repository;
         }
+        // ENDSAMPLE
 
-        // FAIL!
+        // SAMPLE: ShippingScreenPresenter-anti-pattern
         // This is the wrong way to use an IoC container.  Do NOT invoke the container from
         // the constructor function.  This tightly couples the ShippingScreenPresenter to
         // the IoC container in a harmful way.  This class cannot be used in either
@@ -263,9 +305,14 @@ namespace StructureMap.Testing.DocumentationExamples
         // code
         public ShippingScreenPresenter(IContainer container)
         {
+            // It's even worse if you use a static facade to retrieve
+            // a service locator!
             _service = container.GetInstance<IShippingService>();
             _repository = container.GetInstance<IRepository>();
         }
+        // ENDSAMPLE
+
+
 
         #region IPresenter Members
 
@@ -276,12 +323,33 @@ namespace StructureMap.Testing.DocumentationExamples
         #endregion
     }
 
+    public class ShowBuildPlanOfShippingPresenter
+    {
+        // SAMPLE: ShippingScreenPresenter-build-plan
+        public void ShowBuildPlan()
+        {
+            var container = new Container(_ =>
+            {
+                _.For<IShippingService>().Use<InternalShippingService>();
+                _.For<IRepository>().Use<SimpleRepository>();
+            });
+
+            // Just proving that we can build ShippingScreenPresenter;)
+            container.GetInstance<ShippingScreenPresenter>().ShouldNotBeNull();
+
+            var buildPlan = container.Model.For<ShippingScreenPresenter>().Default.DescribeBuildPlan(1);
+
+            Debug.WriteLine(buildPlan);
+        }
+        // ENDSAMPLE
+    }
+
     public class ApplicationController
     {
         public void ActivateScreenFor<T>() where T : IPresenter
         {
-            IPresenter presenter = ObjectFactory.GetInstance<T>();
-            presenter.Activate();
+            //IPresenter presenter = ObjectFactory.GetInstance<T>();
+            //presenter.Activate();
         }
 
         public void ActivateScreen(IPresenter presenter)
@@ -294,8 +362,8 @@ namespace StructureMap.Testing.DocumentationExamples
         public Navigates()
         {
             // You most certainly do NOT just new() up an ApplicationController
-            var controller = ObjectFactory.GetInstance<ApplicationController>();
-            controller.ActivateScreenFor<ShippingScreenPresenter>();
+            //var controller = ObjectFactory.GetInstance<ApplicationController>();
+            //controller.ActivateScreenFor<ShippingScreenPresenter>();
         }
     }
 
@@ -327,8 +395,8 @@ namespace StructureMap.Testing.DocumentationExamples
 
         private void editInvoice(Invoice invoice, ApplicationController controller)
         {
-            var presenter = ObjectFactory.Container.With(invoice).GetInstance<EditInvoicePresenter>();
-            controller.ActivateScreen(presenter);
+            //var presenter = ObjectFactory.Container.With(invoice).GetInstance<EditInvoicePresenter>();
+            //controller.ActivateScreen(presenter);
         }
     }
 
@@ -381,43 +449,12 @@ namespace StructureMap.Testing.DocumentationExamples
             // Put the main form, and some of its children into StructureMap
             // where other Controllers and Commands can get to them
             // without being coupled to the main form
-            ObjectFactory.Container.Inject<IApplicationShell>(shell);
-            ObjectFactory.Container.Inject(shell.QueryToolBar);
-            ObjectFactory.Container.Inject(shell.ExplorerPane);
+            //ObjectFactory.Container.Inject<IApplicationShell>(shell);
+            //ObjectFactory.Container.Inject(shell.QueryToolBar);
+            //ObjectFactory.Container.Inject(shell.ExplorerPane);
 
 
             Application.Run(shell);
-        }
-    }
-
-    public class Bootstrapper : IBootstrapper
-    {
-        private static bool _hasStarted;
-
-        public void BootstrapStructureMap()
-        {
-            ObjectFactory.Initialize(x =>
-            {
-                // initialization
-            });
-        }
-
-        public static void Restart()
-        {
-            if (_hasStarted)
-            {
-                ObjectFactory.Initialize(_ => { });
-            }
-            else
-            {
-                Bootstrap();
-                _hasStarted = true;
-            }
-        }
-
-        public static void Bootstrap()
-        {
-            new Bootstrapper().BootstrapStructureMap();
         }
     }
 

@@ -1,18 +1,19 @@
 <!--Title: Roadmap-->
 <!--Url: roadmap-->
 
-StructureMap 3.0 marked a huge change in the StructureMap internals and public API's. 
-At this point, the StructureMap team is only focusing on bug fixes encountered by users and incremental features requested
-on GitHub. Please log any suspected bugs or feature requests on [StructureMap's GitHub page](https://github.com/structuremap/structuremap).
+StructureMap 3.0 released in early 2014 marked a huge change in the StructureMap internals and public API's. 
 
-## Future Plans
+The ongoing work for version 4.0 is a much smaller release that primarily improves type scanning,
+diagnostics, and performance. The only breaking changes from 3 to 4 are in custom type scanning conventions, the removal of `ObjectFactory`, and
+the elimination of some obscure configuration API's.
 
-Nothing definite has been planned at this point, but these are some of the things that the StructureMap team is considering for the future:
+Please log any suspected bugs or feature requests on [StructureMap's GitHub page](https://github.com/structuremap/structuremap).
 
-1. We would be interested in supporting the Xamarin runtimes for Android and iPhone devices, but we need help from someone who is actually
-   developing on these platforms. StructureMap 3.* targets PCL compliance, so this should be easy, right? Right?
-1. 4.0 will likely target the new K runtime and possibly try to take advantage of the Roslyn compiler abilities for metaprogramming
-1. With the closing down of the FubuMVC project, some functionality from the [FubuCore](https://github.com/DarthFubuMVC/fubucore) library may
-   migrate to a future version of StructureMap.
-   
+
+## Ongoing and upcoming work
+
+1. The 4.0 work can be browsed from the [GitHub issue list](https://github.com/structuremap/structuremap/milestones/4.0).
+1. A new package called _StructureMap.DynamicInterception_ for adding support for AOP with Castle.Core dynamic proxies to StructureMap
+1. The StructureMap.AutoFactory library is being rewritten based on Castle Dynamic Proxy to add more robust capabilities similar to what Windsor has
+1. The [StructureMap.DNX](https://github.com/structuremap/structuremap.dnx) package for DNX integration (an early version is already available on Nuget.org)
 

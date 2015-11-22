@@ -58,7 +58,10 @@ end
 
 desc 'Compile the code'
 task :compile => [:clean, :version] do
-	sh "C:/Windows/Microsoft.NET/Framework/v4.0.30319/msbuild.exe src/StructureMap.sln   /property:Configuration=#{COMPILE_TARGET} /v:m /t:rebuild /nr:False /maxcpucount:2"
+	sh "paket.exe install"
+
+	msbuild = '"C:\Program Files (x86)\MSBuild\14.0\Bin\msbuild.exe"'
+	sh "#{msbuild} src/StructureMap.sln   /property:Configuration=#{COMPILE_TARGET} /v:m /t:rebuild /nr:False /maxcpucount:2"
 end
 
 desc 'Run the unit tests'
@@ -74,8 +77,10 @@ task :compile_signed => [:version, :clean] do
 end
 
 desc 'Build Nuspec packages'
-task :pack => [:compile, :compile_signed] do
-	sh ".paket/paket.exe pack output artifacts version #{build_number}-alpha"
+task :pack => [:compile] do
+	sh "paket.exe pack output artifacts version #{build_number}-alpha"
+	
+	sh "nuget.exe pack src/StructureMap.nuspec -OutputDirectory artifacts -Version #{build_number}-alpha"
 end
 
 desc "Launches VS to the StructureMap solution file"
@@ -85,5 +90,6 @@ end
 
 "Launches the documentation project in editable mode"
 task :docs do
+	sh "paket.exe install"
 	sh "packages/Storyteller/tools/st.exe doc-run -v #{BUILD_VERSION}"
 end

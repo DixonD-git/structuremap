@@ -179,10 +179,8 @@ namespace StructureMap.Testing.Graph
         public void GetMissingType()
         {
             var ex =
-                Exception<StructureMapConfigurationException>.ShouldBeThrownBy(
-                    () => { _container.GetInstance(typeof (string)); });
-
-            ex.Title.ShouldContain("No default");
+                Exception<StructureMapBuildPlanException>.ShouldBeThrownBy(
+                    () => _container.GetInstance(typeof (string)));
         }
 
         [Test]
@@ -275,6 +273,7 @@ namespace StructureMap.Testing.Graph
             rule.ShouldBeOfType(typeof (ColorRule));
         }
 
+        // SAMPLE: TryGetInstanceViaNameAndGeneric_ReturnsInstance_WhenTypeFound
         [Test]
         public void TryGetInstanceViaNameAndGeneric_ReturnsInstance_WhenTypeFound()
         {
@@ -286,6 +285,7 @@ namespace StructureMap.Testing.Graph
             var instance = _container.TryGetInstance<Rule>("Orange");
             instance.ShouldBeOfType(typeof (ColorRule));
         }
+        // ENDSAMPLE
 
         [Test]
         public void TryGetInstanceViaNameAndGeneric_ReturnsNull_WhenTypeNotFound()

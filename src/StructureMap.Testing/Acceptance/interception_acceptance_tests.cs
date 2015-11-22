@@ -11,6 +11,7 @@ namespace StructureMap.Testing.Acceptance
     [TestFixture]
     public class interception_acceptance_tests
     {
+        // SAMPLE: activate_by_action
         [Test]
         public void activate_by_action()
         {
@@ -25,6 +26,7 @@ namespace StructureMap.Testing.Acceptance
                 .ShouldBeOfType<AWidget>()
                 .Activated.ShouldBeTrue();
         }
+        // ENDSAMPLE
 
         [Test]
         public void activate_by_expression_action()
@@ -77,6 +79,42 @@ namespace StructureMap.Testing.Acceptance
                 .ShouldBeTheSameAs(widget);
         }
 
+        // SAMPLE: decorator-by-type-example
+        [Test]
+        public void decorator_example()
+        {
+            var container = new Container(_ =>
+            {
+                // This usage adds the WidgetHolder as a decorator
+                // on all IWidget registrations and makes AWidget
+                // the default
+                _.For<IWidget>().DecorateAllWith<WidgetHolder>();
+                _.For<IWidget>().Use<AWidget>();
+            });
+
+            container.GetInstance<IWidget>()
+                .ShouldBeOfType<WidgetHolder>()
+                .Inner.ShouldBeOfType<AWidget>();
+        }
+        // ENDSAMPLE
+
+        [Test]
+        public void equivalent()
+        {
+            // SAMPLE: simple-decorator-equivalent
+            var container = new Container(_ =>
+            {
+                _.For<IWidget>().Use<WidgetHolder>()
+                    .Ctor<IWidget>().Is<AWidget>();
+            });
+            // ENDSAMPLE
+
+            container.GetInstance<IWidget>()
+                .ShouldBeOfType<WidgetHolder>()
+                .Inner.ShouldBeOfType<AWidget>();
+        }
+
+        // SAMPLE: decorate-plugin-type-with-type
         [Test]
         public void decorate_with_type()
         {
@@ -91,6 +129,7 @@ namespace StructureMap.Testing.Acceptance
                 .Inner
                 .ShouldBeOfType<AWidget>();
         }
+        // ENDSAMPLE
 
         [Test]
         public void decorate_with_type_and_inline_dependency()
@@ -240,6 +279,7 @@ namespace StructureMap.Testing.Acceptance
             decorator.Two.ShouldBeOfType<AService>();
         }
 
+        // SAMPLE: use_a_custom_interception_policy
         [Test]
         public void use_a_custom_interception_policy()
         {
@@ -254,6 +294,8 @@ namespace StructureMap.Testing.Acceptance
                 .ShouldBeOfType<WidgetHolder>()
                 .Inner.ShouldBeOfType<AWidget>();
         }
+        // ENDSAMPLE
+
 
         [Test]
         public void intercept_a_literal_object()
@@ -271,6 +313,7 @@ namespace StructureMap.Testing.Acceptance
         }
     }
 
+    // SAMPLE: Activateable
     public abstract class Activateable
     {
         public bool Activated { get; set; }
@@ -280,6 +323,7 @@ namespace StructureMap.Testing.Acceptance
             Activated = true;
         }
     }
+    // ENDSAMPLE
 
     public class WidgetKeeper
     {
@@ -300,9 +344,11 @@ namespace StructureMap.Testing.Acceptance
     {
     }
 
+    // SAMPLE: AWidget-is-Activateable
     public class AWidget : Activateable, IWidget
     {
     }
+    // ENDSAMPLE
 
     public class BWidget : Activateable, IWidget
     {
@@ -312,6 +358,7 @@ namespace StructureMap.Testing.Acceptance
     {
     }
 
+    // SAMPLE: WidgetHolder
     public class WidgetHolder : IWidget
     {
         private readonly IWidget _inner;
@@ -326,6 +373,7 @@ namespace StructureMap.Testing.Acceptance
             get { return _inner; }
         }
     }
+    // ENDSAMPLE
 
     public class NamedWidgetHolder : WidgetHolder
     {
@@ -425,6 +473,7 @@ namespace StructureMap.Testing.Acceptance
     {
     }
 
+    // SAMPLE: CustomInterception
     public class CustomInterception : IInterceptorPolicy
     {
         public string Description
@@ -436,8 +485,11 @@ namespace StructureMap.Testing.Acceptance
         {
             if (pluginType == typeof (IWidget))
             {
+                // DecoratorInterceptor is the simple case of wrapping one type with another
+                // concrete type that takes the first as a dependency
                 yield return new DecoratorInterceptor(typeof (IWidget), typeof (WidgetHolder));
             }
         }
     }
+    // ENDSAMPLE
 }
